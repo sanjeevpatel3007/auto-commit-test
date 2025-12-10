@@ -1,9 +1,12 @@
 name: Auto Commit Every 1 Minute
 
 on:
-  schedule:
-    - cron: "*/1 * * * *"   # Runs every 1 minute
   workflow_dispatch:
+  schedule:
+    - cron: "*/1 * * * *"
+
+permissions:
+  contents: write
 
 jobs:
   auto-commit:
@@ -14,13 +17,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Update timestamp
-        run: |
-          echo "Last Update: $(date '+%Y-%m-%d %H:%M:%S IST')" > update.txt
+        run: echo "Last Update: $(date '+%Y-%m-%d %H:%M:%S IST')" > update.txt
 
       - name: Commit & Push changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add .
-          git commit -m "Auto commit at $(date '+%H:%M:%S IST')" || echo "No changes"
+          git add update.txt
+          git commit -m "Auto commit at $(date '+%H:%M:%S IST')" || exit 0
           git push
