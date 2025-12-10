@@ -11,18 +11,30 @@ permissions:
 jobs:
   auto-commit:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Update timestamp
-        run: echo "Last Update: $(date '+%Y-%m-%d %H:%M:%S IST')" > update.txt
-
-      - name: Commit & Push changes
+      - name: Setup Git
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+
+      - name: Update timestamp
+        run: |
+          echo "Last Update: $(date '+%Y-%m-%d %H:%M:%S IST')" > update.txt
+
+      - name: Commit changes
+        run: |
           git add update.txt
           git commit -m "Auto commit at $(date '+%H:%M:%S IST')" || exit 0
-          git push
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.8.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
